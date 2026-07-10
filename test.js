@@ -26,6 +26,12 @@ const path = require("path");
 const util = require("util");
 const {get_encoder} = require("./lib/encoders");
 
+// Ogatak lets the user switch off individual charsets, which guess_charset() reads from a
+// config global that the app sets up at startup. For testing, enable every charset -- the
+// Proxy answers true for any key, so charsets added in future are enabled here too.
+
+global.config = new Proxy({}, {get: () => true});
+
 const guess_charset = process.argv[2] ?
 	require(path.resolve(process.cwd(), process.argv[2])) :
 	require(path.join(__dirname, "../ogatak/src/modules/guess_charset"));
