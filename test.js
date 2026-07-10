@@ -1,7 +1,7 @@
 "use strict";
 
 // Tests ogatak's charset guesser against the corpus in files/ and against a
-// generated sweep of windows-1252 characters.
+// generated sweep of latin1 characters.
 //
 // Run: node test.js [path/to/guess_charset.js]
 //
@@ -15,9 +15,9 @@
 // Cyrillic is valid in both Cyrillic charsets, etc) -- so the guesser's answer
 // for them is simply reported, with their directory still recording the truth.
 //
-// Part 2: every windows-1252 character 0xA0-0xFF, in each of several contexts
+// Part 2: every latin1 character 0xA0-0xFF, in each of several contexts
 // inside an otherwise-plain SGF file, must never be guessed as anything but
-// windows-1252 (or null). SGF's default charset is Latin-1, so files like
+// latin1 (or null). SGF's default charset is Latin-1, so files like
 // these are common and must survive guessing -- this is the "sensible Latin-1
 // content is never interpreted as something else" guarantee.
 
@@ -93,9 +93,9 @@ for (let line of ambiguous_report) {
 }
 
 // ------------------------------------------------------------------------------------------------
-// Part 2: the windows-1252 sweep.
+// Part 2: the latin1 sweep.
 
-console.log("windows-1252 sweep:");
+console.log("latin1 sweep:");
 
 const sweep_templates = [
 	"(;GM[1]FF[4]PB[Xmile]PW[John];B[pd])",					// Word-initial, lowercase follows. (The hard case: X + m can form a CJK byte pair.)
@@ -106,18 +106,18 @@ const sweep_templates = [
 	"(;GM[1]FF[4]C[3X points de komi pour blanc];B[pd])",	// After a digit (e.g. 6½).
 ];
 
-const enc1252 = get_encoder("windows-1252");
-const dec1252 = new util.TextDecoder("windows-1252");
+const enc_latin1 = get_encoder("latin1");
+const dec_latin1 = new util.TextDecoder("latin1");
 
 let sweep_count = 0;
 
 for (let b = 0xa0; b < 256; b++) {
-	let ch = dec1252.decode(new Uint8Array([b]));
+	let ch = dec_latin1.decode(new Uint8Array([b]));
 	for (let t of sweep_templates) {
 		let text = t.replace("X", ch);
-		let got = guess_charset(enc1252(text), LIMIT);
+		let got = guess_charset(enc_latin1(text), LIMIT);
 		sweep_count++;
-		if (got !== null && got !== "windows-1252") {
+		if (got !== null && got !== "latin1") {
 			failures++;
 			console.log(`    FAIL: 0x${b.toString(16)} "${ch}" -> ${got} in ${text.slice(0, 40)}`);
 		}

@@ -33,7 +33,7 @@ const samples = {
 		"plain_ascii":				"(;GM[1]FF[4]PB[John Smith]PW[Jane Doe]C[A nice game of go. Black won by resignation.];B[pd])",
 	},
 
-	"windows-1252": {
+	"latin1": {
 		"german":					"(;GM[1]FF[4]PB[Jürgen Müller]PW[Björn Schäfer]C[Schöne Grüße aus München! Ein sehr schönes Spiel, Weiß hätte gewinnen können.];B[pd])",
 		"french":					"(;GM[1]FF[4]PB[Hervé]PW[François]C[Très intéressant. À la fin, noir a gagné.];B[pd])",
 		"french_minimal":			"(;GM[1]FF[4]PB[Émile]PW[John];B[pd])",									// Word-initial accent, minimal other signal.

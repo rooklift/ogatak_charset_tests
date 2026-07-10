@@ -46,9 +46,9 @@ node test.js path/to/guess_charset.js
 ```
 
 Exits 0 if everything passes, 1 otherwise, printing a line per failure. As well as
-the file corpus, the runner sweeps every windows-1252 character 0xA0-0xFF through
+the file corpus, the runner sweeps every latin1 character 0xA0-0xFF through
 several in-file contexts, requiring that none of them is guessed as anything but
-windows-1252 (or null): SGF's default charset is Latin-1, so misguessing sensible
+latin1 (or null): SGF's default charset is Latin-1, so misguessing sensible
 Latin-1 content is the one mistake the guesser must never make.
 
 ## Adding tests
