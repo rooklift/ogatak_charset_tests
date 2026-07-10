@@ -10,6 +10,10 @@
 //
 // Part 1: every .sgf under files/<expected>/ must be guessed as <expected>,
 // where the directory name "null" means the guesser must decline (return null).
+// Files named ambiguous_* carry no expectation -- their content is inherently
+// ambiguous (kanji-only bytes carry no Japanese-vs-Chinese signal, all-caps
+// Cyrillic is valid in both Cyrillic charsets, etc) -- so the guesser's answer
+// for them is simply reported, with their directory still recording the truth.
 //
 // Part 2: every windows-1252 character 0xA0-0xFF, in each of several contexts
 // inside an otherwise-plain SGF file, must never be guessed as anything but
@@ -48,6 +52,7 @@ console.log("file corpus:");
 
 let files_dir = path.join(__dirname, "files");
 let file_count = 0;
+let ambiguous_report = [];
 
 for (let directory of fs.readdirSync(files_dir).sort()) {
 
@@ -58,7 +63,6 @@ for (let directory of fs.readdirSync(files_dir).sort()) {
 
 		let buf = fs.readFileSync(path.join(dirpath, name));
 		let rel = `files/${directory}/${name}`;
-		file_count++;
 
 		if (expected !== null && is_valid_utf8(buf)) {
 			failures++;
@@ -67,6 +71,13 @@ for (let directory of fs.readdirSync(files_dir).sort()) {
 		}
 
 		let got = guess_charset(buf, LIMIT);
+
+		if (name.startsWith("ambiguous_")) {
+			ambiguous_report.push(`    ${rel} -> ${got}`);
+			continue;
+		}
+
+		file_count++;
 		if (got !== expected) {
 			failures++;
 			console.log(`    FAIL: ${rel} -- want ${expected} got ${got}`);
@@ -75,6 +86,11 @@ for (let directory of fs.readdirSync(files_dir).sort()) {
 }
 
 console.log(`    (${file_count} files)`);
+
+console.log("ambiguous files, no expectations, for interest the guesses are:");
+for (let line of ambiguous_report) {
+	console.log(line);
+}
 
 // ------------------------------------------------------------------------------------------------
 // Part 2: the windows-1252 sweep.

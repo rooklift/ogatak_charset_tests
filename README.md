@@ -17,6 +17,12 @@ expected to return for the files inside it. The special directory `null` holds f
 for which the guesser should decline to guess (plain ASCII -- in the real app such
 files are valid UTF-8 and never reach the guesser anyway).
 
+Files named `ambiguous_*` carry no expectation: their content is inherently ambiguous
+(kanji-only bytes carry no Japanese-vs-Chinese signal, hanja-only Korean has no hangul
+to detect, all-caps Cyrillic reads as valid lowercase in the other Cyrillic charset,
+and some Big5 byte sequences are also clean GBK). The runner just reports what the
+guesser says about them, while their directory records their true encoding.
+
 ## Running
 
 Requires an ogatak checkout as a **sibling directory** of this repo:
@@ -58,3 +64,5 @@ other signal (`PB[Émile]`), Icelandic (word-initial Þ/æ/ð everywhere), all-c
 accented text, CJK and Cyrillic text with embedded ASCII words like "KataGo" and
 "joseki", Korean with hanja player names, short name-only files, escaped `]`
 characters, and files with a few corrupt bytes that the guesser should tolerate.
+Name a file `ambiguous_*` if its content genuinely underdetermines its charset --
+it will be reported rather than judged.

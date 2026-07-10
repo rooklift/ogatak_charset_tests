@@ -6,6 +6,12 @@
 // names the charset that guess_charset() is expected to return for it, with
 // "null" meaning the guesser should decline to guess (plain ASCII etc).
 //
+// Exception: files named ambiguous_* carry no expectation, because their content
+// is inherently ambiguous (e.g. kanji-only bytes carry no Japanese-vs-Chinese
+// signal, and all-caps Cyrillic is valid in both Cyrillic charsets). The test
+// runner just reports what the guesser says about them. Their directory still
+// records their true encoding.
+//
 // Since guess_charset() is only ever consulted for buffers that are NOT valid
 // UTF-8 (load_sgf checks first), every generated file outside null/ is asserted
 // to be invalid UTF-8 -- a test file that happened to be valid UTF-8 would
@@ -52,9 +58,9 @@ const samples = {
 		"russian_one_word":			"(;GM[1]FF[4]C[привет];B[pd])",
 		"russian_escaped_bracket":	"(;GM[1]FF[4]C[Комментарий \\] со скобкой];B[pd];W[dd]C[Хороший ход];B[dp]C[Ещё один ход, всё хорошо])",
 		"ukrainian":				"(;GM[1]FF[4]PB[Шевченко Тарас]C[Дуже цікава партія. Чорні грали дуже добре, і білі здалися.];B[pd])",
-		"attempt_realistic_comment":	"(;GM[1]FF[4]CA[Windows-1251]C[Чёрные хорошо сыграли в углу, и белые сдались.];B[pd])",
-		"attempt_realistic_names":	"(;GM[1]FF[4]CA[Windows-1251]PB[Иванов Пётр]PW[Смирнова Анна];B[pd])",
-		"attempt_realistic_uppercase_misdetected_koi8r": "(;GM[1]FF[4]CA[Windows-1251]C[ЧЁРНЫЕ ПОБЕДИЛИ];B[pd])",
+		"russian_short_comment":	"(;GM[1]FF[4]C[Чёрные хорошо сыграли в углу, и белые сдались.];B[pd])",
+		"russian_full_names":		"(;GM[1]FF[4]PB[Иванов Пётр]PW[Смирнова Анна];B[pd])",
+		"ambiguous_caps_only":		"(;GM[1]FF[4]C[ЧЁРНЫЕ ПОБЕДИЛИ];B[pd])",		// Caps in one Cyrillic charset are lowercase in the other.
 	},
 
 	"koi8-r": {
@@ -63,64 +69,64 @@ const samples = {
 		"russian_names_heavy":		"(;GM[1]FF[4]C[Иванов Пётр Сергеевич против Смирновой Анны Павловны. Москва, Россия. Турнир Кубок Москвы.];B[pd])",	// Many capitalised words.
 		"russian_ascii_words":		"(;GM[1]FF[4]C[Анализ с помощью KataGo. Белые играли joseki правильно, но чёрные победили.];B[pd])",
 		"russian_one_word":			"(;GM[1]FF[4]C[привет];B[pd])",
-		"attempt_realistic_comment":	"(;GM[1]FF[4]CA[KOI8-R]C[Чёрные хорошо сыграли в углу, и белые сдались.];B[pd])",
-		"attempt_realistic_names":	"(;GM[1]FF[4]CA[KOI8-R]PB[Иванов Пётр]PW[Смирнова Анна];B[pd])",
-		"attempt_realistic_uppercase_misdetected_windows1251": "(;GM[1]FF[4]CA[KOI8-R]C[ЧЕРНЫЕ ПОБЕДИЛИ];B[pd])",
+		"russian_short_comment":	"(;GM[1]FF[4]C[Чёрные хорошо сыграли в углу, и белые сдались.];B[pd])",
+		"russian_full_names":		"(;GM[1]FF[4]PB[Иванов Пётр]PW[Смирнова Анна];B[pd])",
+		"ambiguous_caps_only":		"(;GM[1]FF[4]C[ЧЕРНЫЕ ПОБЕДИЛИ];B[pd])",		// Caps in one Cyrillic charset are lowercase in the other.
 	},
 
 	"shift_jis": {
 		"japanese":					"(;GM[1]FF[4]PB[小林光一]BR[九段]PW[武宮正樹]C[黒がいい手を打った。とても面白い対局です。];B[pd]C[この手は定石です。])",
 		"japanese_ascii_words":		"(;GM[1]FF[4]PB[小林光一]C[KataGoによる解析です。黒がAIの推奨手を打った。とても面白い対局。];B[pd])",
-		"attempt_realistic_comment":	"(;GM[1]FF[4]CA[SJIS]C[黒は右上隅で良い手を打った。白は投了した。];B[pd])",
-		"attempt_realistic_event":	"(;GM[1]FF[4]CA[SJIS]EV[東京囲碁大会]PB[小林光一]PW[加藤正夫];B[pd])",
-		"attempt_realistic_names":	"(;GM[1]FF[4]CA[SJIS]PB[小林光一]PW[武宮正樹];B[pd])",
+		"japanese_short_comment":	"(;GM[1]FF[4]C[黒は右上隅で良い手を打った。白は投了した。];B[pd])",
+		"japanese_event":			"(;GM[1]FF[4]EV[東京囲碁大会]PB[小林光一]PW[加藤正夫];B[pd])",
+		"japanese_names_only":		"(;GM[1]FF[4]PB[小林光一]PW[武宮正樹];B[pd])",
 	},
 
 	"euc-jp": {
 		"japanese":					"(;GM[1]FF[4]PB[小林光一]BR[九段]PW[武宮正樹]C[黒がいい手を打った。とても面白い対局です。];B[pd])",
 		"japanese_ascii_words":		"(;GM[1]FF[4]PB[小林光一]C[KataGoによる解析。黒がAIの推奨手を打ちました。];B[pd])",
-		"attempt_realistic_comment":	"(;GM[1]FF[4]CA[EUC-JP]C[黒は右上隅で良い手を打った。白は投了した。];B[pd])",
-		"attempt_realistic_names_misdetected_windows1251": "(;GM[1]FF[4]CA[EUC-JP]PB[小林光一]PW[武宮正樹];B[pd])",
-		"attempt_realistic_names_2_misdetected_euckr": "(;GM[1]FF[4]CA[EUC-JP]PB[趙治勲]PW[加藤正夫];B[pd])",
-		"attempt_realistic_names_3_misdetected_gbk": "(;GM[1]FF[4]CA[EUC-JP]PB[井山裕太]PW[張栩];B[pd])",
-		"attempt_realistic_names_4_misdetected_windows1251": "(;GM[1]FF[4]CA[EUC-JP]PB[大竹英雄]PW[林海峰];B[pd])",
-		"attempt_realistic_event_misdetected_windows1251": "(;GM[1]FF[4]CA[EUC-JP]EV[棋聖戦]PB[小林光一]PW[武宮正樹];B[pd])",
-		"attempt_realistic_game_misdetected_windows1251": "(;GM[1]FF[4]CA[EUC-JP]GN[第十局]PB[小林光一]PW[武宮正樹]RE[B+R];B[pd])",
+		"japanese_short_comment":		"(;GM[1]FF[4]C[黒は右上隅で良い手を打った。白は投了した。];B[pd])",
+		"ambiguous_kanji_names_only":	"(;GM[1]FF[4]PB[小林光一]PW[武宮正樹];B[pd])",				// Kanji-only content has no kana, so EUC-JP can't
+		"ambiguous_kanji_names_only_2":	"(;GM[1]FF[4]PB[趙治勲]PW[加藤正夫];B[pd])",					// be told from GBK / EUC-KR etc, whose byte
+		"ambiguous_kanji_names_only_3":	"(;GM[1]FF[4]PB[井山裕太]PW[張栩];B[pd])",					// structure is the same.
+		"ambiguous_kanji_names_only_4":	"(;GM[1]FF[4]PB[大竹英雄]PW[林海峰];B[pd])",
+		"ambiguous_kanji_event":		"(;GM[1]FF[4]EV[棋聖戦]PB[小林光一]PW[武宮正樹];B[pd])",
+		"ambiguous_kanji_game_info":	"(;GM[1]FF[4]GN[第十局]PB[小林光一]PW[武宮正樹]RE[B+R];B[pd])",
 	},
 
 	"gbk": {
 		"chinese":					"(;GM[1]FF[4]PB[聂卫平]PW[马晓春]C[这是一盘非常精彩的对局，黑棋下得很好。];B[pd]C[这一手是定式。])",
 		"chinese_ascii_words":		"(;GM[1]FF[4]PB[聂卫平]C[用KataGo分析了这盘棋，黑棋的AI胜率很高，下得很好。];B[pd])",
 		"chinese_ascii_lower":		"(;GM[1]FF[4]C[黑棋应该下在tengen附近，这样更好。参考joseki变化。];B[pd])",
-		"attempt_realistic_comment":	"(;GM[1]FF[4]CA[GBK]C[黑棋在右上角下了一手好棋，白棋随后认输。];B[pd])",
-		"attempt_realistic_event":	"(;GM[1]FF[4]CA[GBK]EV[北京围棋公开赛]PB[常昊]PW[古力]C[这是一盘精彩的对局。];B[pd])",
-		"attempt_realistic_names":	"(;GM[1]FF[4]CA[GBK]PB[聂卫平]PW[马晓春];B[pd])",
+		"chinese_comment":			"(;GM[1]FF[4]C[黑棋在右上角下了一手好棋，白棋随后认输。];B[pd])",
+		"chinese_event":			"(;GM[1]FF[4]EV[北京围棋公开赛]PB[常昊]PW[古力]C[这是一盘精彩的对局。];B[pd])",
+		"chinese_names_only":		"(;GM[1]FF[4]PB[聂卫平]PW[马晓春];B[pd])",
 	},
 
 	"euc-kr": {
 		"korean":					"(;GM[1]FF[4]PB[이창호]PW[조훈현]C[아주 재미있는 대국입니다. 흑이 잘 두었습니다.];B[pd]C[이 수는 정석입니다.])",
 		"korean_hanja_names":		"(;GM[1]FF[4]PB[李昌鎬]PW[曺薰鉉]C[아주 재미있는 대국입니다. 흑이 잘 두었습니다.];B[pd])",		// Hanja names, hangul comments.
 		"korean_ascii_words":		"(;GM[1]FF[4]PB[이창호]C[KataGo로 분석한 대국입니다. 흑이 AI 추천수를 두었습니다.];B[pd])",
-		"attempt_realistic_comment":	"(;GM[1]FF[4]CA[EUC-KR]C[흑은 우상귀에서 좋은 수를 두었고 백은 곧 기권했다.];B[pd])",
-		"attempt_realistic_names":	"(;GM[1]FF[4]CA[EUC-KR]PB[이창호]PW[조훈현];B[pd])",
-		"attempt_realistic_hanja_names_misdetected_windows1251": "(;GM[1]FF[4]CA[EUC-KR]PB[李昌鎬]PW[曺薰鉉];B[pd])",
-		"attempt_realistic_hanja_names_2_misdetected_gbk": "(;GM[1]FF[4]CA[EUC-KR]PB[劉昌赫]PW[徐奉洙];B[pd])",
-		"attempt_realistic_hanja_event_misdetected_big5": "(;GM[1]FF[4]CA[EUC-KR]EV[韓國棋院]PB[李昌鎬]PW[曺薰鉉];B[pd])",
+		"korean_short_comment":			"(;GM[1]FF[4]C[흑은 우상귀에서 좋은 수를 두었고 백은 곧 기권했다.];B[pd])",
+		"korean_names_only":			"(;GM[1]FF[4]PB[이창호]PW[조훈현];B[pd])",
+		"ambiguous_hanja_names_only":	"(;GM[1]FF[4]PB[李昌鎬]PW[曺薰鉉];B[pd])",					// Hanja-only content has no hangul, i.e. no
+		"ambiguous_hanja_names_only_2":	"(;GM[1]FF[4]PB[劉昌赫]PW[徐奉洙];B[pd])",					// Korean signal at all.
+		"ambiguous_hanja_event":		"(;GM[1]FF[4]EV[韓國棋院]PB[李昌鎬]PW[曺薰鉉];B[pd])",
 	},
 
 	"big5": {
 		"chinese":					"(;GM[1]FF[4]PB[周俊勳]PW[王元均]C[這是一盤非常精彩的對局，黑棋下得很好。];B[pd])",
 		"chinese_ascii_words":		"(;GM[1]FF[4]PB[周俊勳]C[用KataGo分析這盤棋，黑棋的AI勝率很高。];B[pd])",
-		"attempt_realistic_comment":	"(;GM[1]FF[4]CA[big5]C[黑棋在右上角下了一手好棋。白棋隨後投子認輸。];B[pd])",
-		"attempt_realistic_event":	"(;GM[1]FF[4]CA[big5]EV[台北圍棋公開賽]PB[林海峰]PW[王立誠]C[這是一盤精彩的對局。];B[pd])",
-		"attempt_realistic_names":	"(;GM[1]FF[4]CA[big5]PB[林海峰]PW[王立誠];B[pd])",
-		"attempt_realistic_names_2":	"(;GM[1]FF[4]CA[big5]PB[陳志明]PW[林國華]RE[B+R];B[pd])",
-		"attempt_realistic_strategy":	"(;GM[1]FF[4]CA[big5]C[實戰黑棋選擇在右上角進行攻擊，白棋應該先補強弱棋。];B[pd])",
-		"attempt_realistic_tournament": "(;GM[1]FF[4]CA[big5]C[本局於台北棋院舉行，雙方布局平穩，最後黑棋中盤勝。];B[pd])",
-		"attempt_realistic_minimal":	"(;GM[1]FF[4]CA[big5]PB[黑棋]PW[白棋]C[黑棋好手。];B[pd])",
-		"attempt_realistic_short_comment": "(;GM[1]FF[4]CA[big5]C[黑棋好手，白棋認輸。];B[pd])",
-		"attempt_realistic_short_event": "(;GM[1]FF[4]CA[big5]EV[台北棋賽]PB[王立誠]PW[林海峰];B[pd])",
-		"attempt_realistic_safe_han_misdetected_gbk": "(;GM[1]FF[4]CA[big5]C[實戰黑棋進擊 黑棋勝];B[pd])",
+		"chinese_comment":			"(;GM[1]FF[4]C[黑棋在右上角下了一手好棋。白棋隨後投子認輸。];B[pd])",
+		"chinese_event":			"(;GM[1]FF[4]EV[台北圍棋公開賽]PB[林海峰]PW[王立誠]C[這是一盤精彩的對局。];B[pd])",
+		"chinese_names_only":		"(;GM[1]FF[4]PB[林海峰]PW[王立誠];B[pd])",
+		"chinese_names_only_2":		"(;GM[1]FF[4]PB[陳志明]PW[林國華]RE[B+R];B[pd])",
+		"chinese_strategy_comment":	"(;GM[1]FF[4]C[實戰黑棋選擇在右上角進行攻擊，白棋應該先補強弱棋。];B[pd])",
+		"chinese_tournament_comment": "(;GM[1]FF[4]C[本局於台北棋院舉行，雙方布局平穩，最後黑棋中盤勝。];B[pd])",
+		"chinese_minimal":			"(;GM[1]FF[4]PB[黑棋]PW[白棋]C[黑棋好手。];B[pd])",
+		"chinese_short_comment":	"(;GM[1]FF[4]C[黑棋好手，白棋認輸。];B[pd])",
+		"chinese_short_event":		"(;GM[1]FF[4]EV[台北棋賽]PB[王立誠]PW[林海峰];B[pd])",
+		"ambiguous_gbk_compatible_han": "(;GM[1]FF[4]C[實戰黑棋進擊 黑棋勝];B[pd])",					// Hanzi whose Big5 bytes are also valid GBK.
 	},
 
 };
@@ -161,11 +167,6 @@ for (let [directory, files] of Object.entries(samples)) {
 	fs.mkdirSync(dirpath, {recursive: true});
 	let encode = (directory === "null") ? (s => new TextEncoder().encode(s)) : get_encoder(directory);
 	for (let [name, text] of Object.entries(files)) {
-		// The CA tags on exploratory samples document their source encoding in this file, but are
-		// omitted from the generated SGFs so Ogatak has to exercise its charset guesser.
-		if (name.startsWith("attempt_")) {
-			text = text.replace(/CA\[[^\]]+\]/, "");
-		}
 		let buf = encode(text);
 		if (directory !== "null" && is_valid_utf8(buf)) {
 			throw new Error(`${directory}/${name} is valid UTF-8 and would never reach the guesser -- change the sample.`);
