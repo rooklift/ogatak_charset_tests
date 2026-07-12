@@ -137,6 +137,21 @@ const dirty = [
 	["euc-kr",		"korean_dirty",		"korean",	[0x80]],
 ];
 
+// UTF-8 samples: these only reach the guesser when they are NOT valid UTF-8 (load_sgf
+// checks first), so all of them get stray bytes inserted -- either corruption (0x80) or
+// a latin1-encoded byte pasted in by some old editor (0xE9 = é). A clean sample would be
+// pointless, and is rejected below. Each entry: [filename, text, bytes to insert].
+
+const utf8_dirty = [
+	["russian_dirty",		"(;GM[1]FF[4]PB[Иванов Пётр]PW[Смирнова Анна]C[Комментарий к партии. Белые играли очень хорошо, но чёрные победили.];B[pd])",	[0x80]],
+	["russian_dirty_2",		"(;GM[1]FF[4]PB[Иванов Пётр]PW[Смирнова Анна]C[Комментарий к партии. Белые играли очень хорошо, но чёрные победили.];B[pd])",	[0x80, 0x80, 0x80]],
+	["japanese_dirty",		"(;GM[1]FF[4]PB[小林光一]BR[九段]PW[武宮正樹]C[黒がいい手を打った。とても面白い対局です。];B[pd])",	[0x80]],
+	["chinese_dirty",		"(;GM[1]FF[4]PB[聂卫平]PW[马晓春]C[这是一盘非常精彩的对局，黑棋下得很好。];B[pd])",	[0x80, 0x80]],
+	["korean_dirty",		"(;GM[1]FF[4]PB[이창호]PW[조훈현]C[아주 재미있는 대국입니다. 흑이 잘 두었습니다.];B[pd])",	[0x80, 0x80]],
+	["german_dirty",		"(;GM[1]FF[4]PB[Jürgen Müller]C[Schöne Grüße aus München, Weiß hätte gewinnen können.];B[pd])",	[0x80]],
+	["latin1_byte_pasted",	"(;GM[1]FF[4]PB[Andre]PW[Иванов]C[Комментарий к партии, чёрные победили.];B[pd])",	[0xe9]],
+];
+
 // ------------------------------------------------------------------------------------------------
 
 function is_valid_utf8(buf) {
@@ -176,6 +191,17 @@ for (let [directory, files] of Object.entries(samples)) {
 for (let [directory, name, source, bytes] of dirty) {
 	let src = fs.readFileSync(path.join(__dirname, "files", directory, source + ".sgf"));
 	fs.writeFileSync(path.join(__dirname, "files", directory, name + ".sgf"), insert_spread(src, bytes));
+	count++;
+}
+
+fs.mkdirSync(path.join(__dirname, "files", "utf-8"), {recursive: true});
+
+for (let [name, text, bytes] of utf8_dirty) {
+	let buf = insert_spread(new TextEncoder().encode(text), bytes);
+	if (is_valid_utf8(buf)) {
+		throw new Error(`utf-8/${name} came out valid UTF-8 -- pointless, see the note on utf8_dirty.`);
+	}
+	fs.writeFileSync(path.join(__dirname, "files", "utf-8", name + ".sgf"), buf);
 	count++;
 }
 

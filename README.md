@@ -17,6 +17,9 @@ expected to return for the files inside it. The special directory `null` holds f
 for which the guesser should decline to guess (plain ASCII -- in the real app such
 files are valid UTF-8 and never reach the guesser anyway).
 
+The `utf-8` directory holds *dirty* UTF-8 files -- genuine UTF-8 with a few corrupt or
+foreign bytes inserted -- since clean UTF-8 never reaches the guesser at all.
+
 ## Running
 
 Requires an ogatak checkout as a **sibling directory** of this repo:
