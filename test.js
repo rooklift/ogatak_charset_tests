@@ -10,11 +10,6 @@
 //
 // Part 1: every .sgf under files/<expected>/ must be guessed as <expected>,
 // where the directory name "null" means the guesser must decline (return null).
-// Files named ambiguous_* carry no expectation -- their content is inherently
-// ambiguous (kanji-only bytes carry no Japanese-vs-Chinese signal, all-caps
-// Cyrillic is valid in both Cyrillic charsets, etc) -- so the guesser's answer
-// for them is simply reported, with their directory still recording the truth.
-//
 // Part 2: every latin1 character 0xA0-0xFF, in each of several contexts
 // inside an otherwise-plain SGF file, must never be guessed as anything but
 // latin1 (or null). SGF's default charset is Latin-1, so files like
@@ -48,11 +43,10 @@ let failures = 0;
 // ------------------------------------------------------------------------------------------------
 // Part 1: the file corpus.
 
-console.log("file corpus:");
-
 let files_dir = path.join(__dirname, "files");
 let file_count = 0;
-let ambiguous_report = [];
+
+let fails = Object.create(null);
 
 for (let directory of fs.readdirSync(files_dir).sort()) {
 
@@ -66,36 +60,45 @@ for (let directory of fs.readdirSync(files_dir).sort()) {
 
 		if (expected !== null && is_valid_utf8(buf)) {
 			failures++;
-			console.log(`    FAIL: ${rel} is valid UTF-8 and would never reach the guesser`);
+			if (Object.hasOwn(fails, expected)) {
+				fails[expected].push([rel, "utf8"]);
+			} else {
+				fails[expected] = [[rel, "utf8"]];
+			}
 			continue;
 		}
 
 		let got = guess_charset(buf, LIMIT);
 
-		if (name.startsWith("ambiguous_")) {
-			ambiguous_report.push(`    ${rel} -> ${got}`);
-			continue;
-		}
-
 		file_count++;
 		if (got !== expected) {
 			failures++;
-			console.log(`    FAIL: ${rel} -- want ${expected} got ${got}`);
+
+			if (Object.hasOwn(fails, expected)) {
+				fails[expected].push([rel, got]);
+			} else {
+				fails[expected] = [[rel, got]];
+			}
+			continue;
 		}
 	}
 }
 
-console.log(`    (${file_count} files)`);
+console.log("=".repeat(80));
+console.log(`file corpus:    (${file_count} files)`);
+console.log("=".repeat(80));
 
-console.log("ambiguous files, no expectations, for interest the guesses are:");
-for (let line of ambiguous_report) {
-	console.log(line);
+for (let expected of Object.keys(fails)) {
+	console.log(expected);
+	for (let [rel, got] of fails[expected]) {
+		console.log(`    --> ${got}, ${rel}`);
+	}
 }
 
 // ------------------------------------------------------------------------------------------------
 // Part 2: the latin1 sweep.
 
-console.log("latin1 sweep:");
+console.log();
 
 const sweep_templates = [
 	"(;GM[1]FF[4]PB[Xmile]PW[John];B[pd])",					// Word-initial, lowercase follows. (The hard case: X + m can form a CJK byte pair.)
@@ -110,6 +113,7 @@ const enc_latin1 = get_encoder("latin1");
 const dec_latin1 = new util.TextDecoder("latin1");
 
 let sweep_count = 0;
+let sweep_fails = [];
 
 for (let b = 0xa0; b < 256; b++) {
 	let ch = dec_latin1.decode(new Uint8Array([b]));
@@ -119,12 +123,22 @@ for (let b = 0xa0; b < 256; b++) {
 		sweep_count++;
 		if (got !== null && got !== "latin1") {
 			failures++;
-			console.log(`    FAIL: 0x${b.toString(16)} "${ch}" -> ${got} in ${text.slice(0, 40)}`);
+			sweep_fails.push(`    FAIL: 0x${b.toString(16)} "${ch}" -> ${got} in ${text.slice(0, 40)}`);
 		}
 	}
 }
 
-console.log(`    (${sweep_count} cases)`);
+console.log("=".repeat(80));
+console.log(`latin1 sweep (${sweep_count} cases)`);
+console.log("=".repeat(80));
+
+if (sweep_fails.length === 0) {
+	console.log("    OK");
+} else {
+	for (let s of sweep_fails) {
+		console.log(sweep_fails);
+	}
+}
 
 // ------------------------------------------------------------------------------------------------
 
