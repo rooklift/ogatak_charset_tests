@@ -79,6 +79,7 @@ const samples = {
 	"euc-jp": {
 		"japanese":					"(;GM[1]FF[4]PB[小林光一]BR[九段]PW[武宮正樹]C[黒がいい手を打った。とても面白い対局です。];B[pd])",
 		"japanese_ranked_names_only":	"(;GM[1]FF[4]PB[井山裕太]BR[九段]PW[一力遼]WR[九段];B[pd])",			// Kanji-only, but the Japanese rank notation is decisive.
+		"japanese_digit_ranked_names_only":	"(;GM[1]FF[4]PB[小林光一]BR[3段]PW[武宮正樹]WR[9段];B[pd])",	// Rescued by the ascii-digit rank rule.
 		"japanese_ascii_words":		"(;GM[1]FF[4]PB[小林光一]C[KataGoによる解析。黒がAIの推奨手を打ちました。];B[pd])",
 		"japanese_short_comment":		"(;GM[1]FF[4]C[黒は右上隅で良い手を打った。白は投了した。];B[pd])",
 		"kanji_names_only":			"(;GM[1]FF[4]PB[小林光一]PW[武宮正樹];B[pd])",				// Kanji-only content has no kana, so EUC-JP can't
